@@ -1,9 +1,16 @@
-import ffmpeg, { FfprobeData } from 'fluent-ffmpeg';
+import ffmpeg from 'fluent-ffmpeg';
+import ffmpegInstaller from '@ffmpeg-installer/ffmpeg';
+import ffprobeStatic from 'ffprobe-static';
 import fs from 'fs';
+import path from 'path';
+
+// Set ffmpeg paths
+ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfprobePath(ffprobeStatic.path);
 
 async function getMediaDuration(filePath: string): Promise<number> {
     return new Promise((resolve, reject) => {
-        ffmpeg.ffprobe(filePath, (err: Error | null, metadata: FfprobeData) => {
+        ffmpeg.ffprobe(filePath, (err: Error | null, metadata: any) => {
             if (err) reject(err);
             resolve(metadata.format.duration || 0);
         });
@@ -14,22 +21,24 @@ async function mergeVideoWithAudio(wavPath: string, videoPath: string, outputPat
     try {
         // Get audio duration
         const audioDuration = await getMediaDuration(wavPath);
+        console.log('Audio duration:', audioDuration);
 
         return new Promise((resolve, reject) => {
             ffmpeg()
                 .input(videoPath)
-                .inputOptions(['-stream_loop -1']) // Loop video
                 .input(wavPath)
-                .addOutputOptions([
-                    '-c:v copy',           // Copy video codec (no re-encoding)
-                    `-t ${audioDuration}`, // Match audio duration
-                    '-shortest',           // End when shortest input ends
+                .outputOptions([
+                    '-c:v copy',
+                    '-c:a aac',
+                    '-strict experimental'
                 ])
                 .save(outputPath)
                 .on('end', () => {
+                    console.log('Finished processing');
                     resolve(outputPath);
                 })
                 .on('error', (err: Error) => {
+                    console.error('Error:', err);
                     reject(err);
                 });
         });

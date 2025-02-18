@@ -55,22 +55,22 @@ export default function Home() {
       console.log('Starting processing with timestamp:', timestamp); // Debug log
 
       //Step 1: Get Mock Response
-      await simulateProgress(0, 30);
-      const mockText = await generateMockResponse(message, timestamp);
-      setResult(mockText);
+      // await simulateProgress(0, 30);
+      // const mockText = await generateMockResponse(message, timestamp);
+      // setResult(mockText);
       
-      setStatus('processing voice');
-      await simulateProgress(30, 60);
+      // setStatus('processing voice');
+      // await simulateProgress(30, 60);
 
-      // Step 2: Generate Speech
-      const audioPath = await generateSpeech(mockText, timestamp, message);
+      // // Step 2: Generate Speech
+      // const audioPath = await generateSpeech(mockText, timestamp, message);
       
-      await simulateProgress(60, 90);
-      setStatus('processing video');
+      // await simulateProgress(60, 90);
+      // setStatus('processing video');
 
       // // Step 3: Generate Video
-      //setResult("Stop being a tease? Darling, that's like asking a leopard to change its spots.");
-      //const audioPath = `/home/savnkk/projs/Text_Bully/output/2025-02-18T10-06-31-212Z_will_you_ever_stop_being_such.wav`;
+      setResult("Stop being a tease? Darling, that's like asking a leopard to change its spots.");
+      const audioPath = `/home/savnkk/projs/Text_Bully/output/2025-02-18T10-06-31-212Z_will_you_ever_stop_being_such.wav`;
       const videoUrl = await generateVideo(audioPath, timestamp, message);
       setVideoUrl(videoUrl);;
       

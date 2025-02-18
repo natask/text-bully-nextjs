@@ -25,14 +25,18 @@ export async function POST(req: Request) {
     );
 
     // Download the audio file from the output URL
+    if (typeof output !== 'string') {
+      throw new Error('Invalid output format from Replicate');
+    }
+
     const response = await fetch(output);
     if (!response.ok) {
       throw new Error(`Failed to download audio: ${response.statusText}`);
     }
-    
-    const audioBuffer = Buffer.from(await response.arrayBuffer());
 
-    // Save the audio file
+    const audioBuffer = Buffer.from(await response.arrayBuffer());
+    
+    // Convert the audio stream to WAV with standardized filename
     const fileInfo = createFileInfo(prompt, timestamp);
     const wavOutputPath = await writeOutputFileAsync(fileInfo.getPath('audio'), audioBuffer);
     console.log('Audio file saved at:', wavOutputPath);

@@ -1,14 +1,14 @@
 import React from 'react';
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Play, Download } from "lucide-react";
+import { Play, Download, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ResultDisplayProps {
   text: string;
   videoUrl?: string;
-  onPlay?: () => void;
-  onDownload?: () => void;
+  onPlay: () => void;
+  onDownload: () => void;
   className?: string;
 }
 
@@ -16,33 +16,54 @@ const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className }: Result
   if (!text) return null;
 
   return (
-    <Card className={cn("overflow-hidden", className)}>
-      <CardContent className="p-6 space-y-4">
-        <div className="space-y-2">
-          <h3 className="text-lg font-semibold text-purple-800">Generated Response</h3>
-          <p className="text-gray-700">{text}</p>
+    <Card className={cn("w-full p-6 space-y-4 animate-fade-up bg-gradient-to-br from-white/80 to-purple-50/80 backdrop-blur-sm border-2 border-white/50 shadow-xl", className)}>
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-purple-600">
+          <MessageSquare className="w-5 h-5" />
+          <h3 className="text-sm font-medium">Your Savage Comeback</h3>
         </div>
-
-        {videoUrl && (
-          <div className="flex gap-2">
-            <Button
-              onClick={onPlay}
-              className="flex-1 bg-gradient-to-r from-purple-600 to-purple-800 text-white hover:from-purple-700 hover:to-purple-900"
-            >
-              <Play className="w-4 h-4 mr-2" />
-              Play Video
-            </Button>
-            <Button
-              onClick={onDownload}
-              variant="outline"
-              className="flex-1 border-purple-200 hover:bg-purple-50"
-            >
-              <Download className="w-4 h-4 mr-2" />
-              Download
-            </Button>
+        <p className="text-gray-800 font-medium leading-relaxed">{text}</p>
+      </div>
+      
+      {videoUrl && (
+        <div className="flex gap-3">
+          <Button
+            variant="secondary"
+            size="sm"
+            className="flex items-center gap-2 bg-purple-500 text-white hover:bg-purple-600 transition-all duration-200"
+            onClick={onPlay}
+          >
+            <Play size={16} />
+            Play
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2 border-purple-200 hover:border-purple-300 hover:bg-purple-50 transition-all duration-200"
+            onClick={onDownload}
+          >
+            <Download size={16} />
+            Download
+          </Button>
+        </div>
+      )}
+      
+      <div className="mt-4 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg">
+        {videoUrl ? (
+          <video
+            className="w-full aspect-video"
+            controls
+            src={videoUrl}
+          />
+        ) : (
+          <div className="w-full aspect-video bg-gradient-to-br from-purple-100/50 to-white/50 flex items-center justify-center">
+            <div className="text-center text-gray-400">
+              <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
+              <p className="text-sm">Video will appear here</p>
+            </div>
           </div>
         )}
-      </CardContent>
+      </div>
     </Card>
   );
 };

@@ -6,18 +6,38 @@ import ProcessingStatus from '@/components/ProcessingStatus';
 import ResultDisplay from '@/components/ResultDisplay';
 import { Button } from '@/components/ui/button';
 import { Zap, MessageSquare } from "lucide-react";
-import { toast } from "@/hooks/use-toast";
+import { useToast } from "@/hooks/use-toast";
+//import { generateMockResponse } from '@/lib/api';
+import { generateMockResponse, generateSpeech, generateVideo } from '@/lib/api';
+
 
 export default function Home() {
-  const [input, setInput] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [message, setMessage] = useState('');
+  const [status, setStatus] = useState<'idle' | 'processing message' | 'processing voice' | 'processing video' | 'complete' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
-  const [responseText, setResponseText] = useState('');
+  const [result, setResult] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const { toast } = useToast();
 
-  const handleSubmit = async () => {
-    if (!input.trim()) {
+  const simulateProgress = (start: number, end: number) => {
+    return new Promise<void>(resolve => {
+      let current = start;
+      const interval = setInterval(() => {
+        if (current >= end) {
+          clearInterval(interval);
+          resolve();
+        } else {
+          current += 2;
+          setProgress(current);
+        }
+      }, 50);
+    });
+  };
+
+  const handleProcess = async () => {
+    console.log('handleProcess called with message:', message); // Debug log
+
+    if (!message.trim()) {
       toast({
         title: "Error",
         description: "Please enter a message first",
@@ -26,139 +46,108 @@ export default function Home() {
       return;
     }
     
+    setStatus('processing message');
+    setProgress(0);
+
     try {
-      setLoading(true);
-      setError(null);
-      setProgress(0);
+      // Generate timestamp for this processing session
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      console.log('Starting processing with timestamp:', timestamp); // Debug log
+
+      //Step 1: Get Mock Response
+      await simulateProgress(0, 30);
+      const mockText = await generateMockResponse(message, timestamp);
+      setResult(mockText);
       
-      // Step 1: Get LLM Response
-      setProgress(20);
-      const llmResponse = await fetch('/api/llm', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: input }),
-      });
-      
-      if (!llmResponse.ok) throw new Error('LLM request failed');
-      const llmData = await llmResponse.json();
-      setResponseText(llmData.response);
-      setProgress(40);
+      setStatus('processing voice');
+      await simulateProgress(30, 60);
 
       // Step 2: Generate Speech
-      setProgress(60);
-      const speechResponse = await fetch('/api/speech', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: llmData.response }),
-      });
+      const audioPath = await generateSpeech(mockText, timestamp, message);
       
-      if (!speechResponse.ok) throw new Error('Speech generation failed');
-      const speechData = await speechResponse.json();
-      setProgress(80);
+      await simulateProgress(60, 90);
+      setStatus('processing video');
 
-      // Step 3: Generate Video
-      const videoResponse = await fetch('/api/deepfake', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          audioUrl: speechData.output,
-        }),
-      });
+      // // Step 3: Generate Video
+      //setResult("Stop being a tease? Darling, that's like asking a leopard to change its spots.");
+      //const audioPath = `/home/savnkk/projs/Text_Bully/output/2025-02-18T10-06-31-212Z_will_you_ever_stop_being_such.wav`;
+      const videoUrl = await generateVideo(audioPath, timestamp, message);
+      setVideoUrl(videoUrl);;
       
-      if (!videoResponse.ok) throw new Error('Video generation failed');
-      const videoData = await videoResponse.json();
-
-      setVideoUrl(videoData.output);
-      setProgress(100);
+      await simulateProgress(90, 100);
+      
+      setStatus('complete');
       toast({
         title: "Success",
-        description: "Your roast has been generated!"
+        description: "Time to mock your friends!"
       });
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'An error occurred';
-      setError(message);
+    } catch (error) {
+      console.error('Processing error:', error);
+      setStatus('error');
       toast({
         title: "Error",
-        description: message,
+        description: "Failed to process your request",
         variant: "destructive"
       });
-    } finally {
-      setLoading(false);
     }
   };
 
   const handlePlay = () => {
-    if (videoUrl) {
-      window.open(videoUrl, '_blank');
-    }
+    toast({
+      title: "Info",
+      description: "Play functionality will be implemented in the next version"
+    });
   };
 
   const handleDownload = () => {
-    if (videoUrl) {
-      const a = document.createElement('a');
-      a.href = videoUrl;
-      a.download = 'roast.mp4';
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-    }
-  };
-
-  const getStatus = () => {
-    if (error) return 'error';
-    if (loading) return 'processing';
-    if (videoUrl) return 'complete';
-    return 'idle';
+    toast({
+      title: "Info",
+      description: "Download functionality will be implemented in the next version"
+    });
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-50 to-white">
-      <div className="max-w-4xl mx-auto p-8 space-y-8">
-        <div className="space-y-2">
-          <div className="flex items-center gap-2">
-            <Zap className="w-8 h-8 text-purple-600" />
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-purple-800 bg-clip-text text-transparent">
-              AI Roast Generator
-            </h1>
+    <div className="relative min-h-screen overflow-hidden bg-gradient-to-br from-purple-50 via-red-50 to-orange-50">
+      {/* Bouncing background elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute w-[40rem] h-[40rem] bg-purple-200/20 rounded-full -top-48 -left-48 animate-[bounce_8s_ease-in-out_infinite]" />
+        <div className="absolute w-[35rem] h-[35rem] bg-red-200/30 rounded-full top-1/2 -translate-y-1/2 -right-64 animate-[bounce_7s_ease-in-out_infinite_0.5s]" />
+        <div className="absolute w-[30rem] h-[30rem] bg-orange-200/20 rounded-full -bottom-48 -left-48 animate-[bounce_6s_ease-in-out_infinite_1s]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-white/0 via-white/50 to-white/0 backdrop-blur-[1px]" />
+      </div>
+
+      <div className="relative min-h-screen flex items-center justify-center px-4">
+        <div className="container max-w-2xl space-y-8">
+          <div className="text-center space-y-4 animate-fade-up">
+            <div className="inline-flex items-center justify-center gap-3 mb-4">
+              <MessageSquare className="w-12 h-12 text-red-500" />
+              <h1 className="font-black tracking-tight bg-gradient-to-r from-red-600 via-purple-600 to-orange-500 bg-clip-text text-transparent text-6xl">
+                Text Bully
+              </h1>
+            </div>
+            <p className="text-gray-600 text-lg">Transform your text into a savage comeback</p>
           </div>
-          <p className="text-purple-600/80">Enter your text and let AI create a savage comeback.</p>
-        </div>
 
-        <div className="space-y-6">
-          <TextInput 
-            value={input}
-            onChange={setInput}
-            placeholder="Enter text to roast..."
-          />
+          <div className="space-y-6 backdrop-blur-sm bg-white/30 p-8 rounded-2xl border border-white/50 shadow-lg">
+            <TextInput value={message} onChange={setMessage} />
+            
+            <div className="flex justify-center">
+              <Button 
+                onClick={handleProcess} 
+                disabled={status.includes('processing')} 
+                className="min-w-[200px] bg-gradient-to-r from-red-500 via-purple-500 to-orange-500 hover:from-red-600 hover:via-purple-600 hover:to-orange-600 transform hover:scale-105 transition-all duration-200 shadow-lg group"
+              >
+                <Zap className="mr-2 h-4 w-4 group-hover:animate-bounce" />
+                Bully This Text
+              </Button>
+            </div>
 
-          <Button
-            onClick={handleSubmit}
-            disabled={loading || !input.trim()}
-            className="w-full bg-gradient-to-r from-purple-600 to-purple-800 text-white hover:from-purple-700 hover:to-purple-900 transition-all duration-200"
-          >
-            <MessageSquare className="w-4 h-4 mr-2" />
-            {loading ? 'Generating...' : 'Generate Roast'}
-          </Button>
+            {status !== 'idle' && <ProcessingStatus status={status} progress={progress} />}
 
-          {(loading || error || videoUrl) && (
-            <ProcessingStatus 
-              status={getStatus()}
-              progress={progress}
-              className="animate-fade-up"
-            />
-          )}
-
-          {responseText && (
-            <ResultDisplay
-              text={responseText}
-              videoUrl={videoUrl || undefined}
-              onPlay={handlePlay}
-              onDownload={handleDownload}
-              className="animate-fade-up"
-            />
-          )}
+            {status === 'complete' && <ResultDisplay text={result} onPlay={handlePlay} onDownload={handleDownload} videoUrl={videoUrl} />}
+          </div>
         </div>
       </div>
-    </main>
+    </div>
   );
 }

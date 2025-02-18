@@ -1,8 +1,0 @@
-{
-  "name": "text-bully",
-  "version": "1.0.0",
-  "type": "module",
-  "dependencies": {
-    "replicate": "^0.25.1"
-  }
-}

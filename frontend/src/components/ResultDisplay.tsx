@@ -1,7 +1,7 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Download, MessageSquare } from "lucide-react";
+import { Play, Download, MessageSquare, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ResultDisplayProps {
@@ -10,9 +10,10 @@ interface ResultDisplayProps {
   onPlay: () => void;
   onDownload: () => void;
   className?: string;
+  isProcessing?: boolean;
 }
 
-const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className }: ResultDisplayProps) => {
+const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className, isProcessing }: ResultDisplayProps) => {
   if (!text) return null;
 
   return (
@@ -22,7 +23,7 @@ const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className }: Result
           <MessageSquare className="w-5 h-5" />
           <h3 className="text-sm font-medium">Your Savage Comeback</h3>
         </div>
-        <p className="text-gray-800 font-medium leading-relaxed">{text}</p>
+        <p className="text-gray-800 font-medium leading-relaxed break-words whitespace-pre-wrap max-w-full overflow-visible">{text}</p>
       </div>
       
       {videoUrl && (
@@ -56,11 +57,15 @@ const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className }: Result
             src={videoUrl}
           />
         ) : (
-          <div className="w-full aspect-video bg-gradient-to-br from-purple-100/50 to-white/50 flex items-center justify-center">
-            <div className="text-center text-gray-400">
-              <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">Video will appear here</p>
-            </div>
+          <div className="w-full aspect-video bg-gray-900 flex items-center justify-center">
+            {isProcessing ? (
+              <div className="flex flex-col items-center gap-3 text-white/70">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <p className="text-sm">Weaponizing pixels just for you...</p>
+              </div>
+            ) : (
+              <p className="text-white/50 text-sm">Video will appear here</p>
+            )}
           </div>
         )}
       </div>

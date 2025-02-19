@@ -39,8 +39,8 @@ export default function Home() {
 
     if (!message.trim()) {
       toast({
-        title: "Error",
-        description: "Please enter a message first",
+        title: "Achievement Unlocked: Empty Box Master",
+        description: "Congratulations on submitting absolutely nothing. That takes special talent!",
         variant: "destructive"
       });
       return;
@@ -50,43 +50,39 @@ export default function Home() {
     setProgress(0);
 
     try {
-      // Generate timestamp for this processing session
       const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-      console.log('Starting processing with timestamp:', timestamp); // Debug log
+      console.log('Starting processing with timestamp:', timestamp);
 
       //Step 1: Get Mock Response
-      // await simulateProgress(0, 30);
-      // const mockText = await generateMockResponse(message, timestamp);
-      // setResult(mockText);
+      await simulateProgress(0, 30);
+      const mockText = await generateMockResponse(message, timestamp);
+      setResult(mockText);  // Show text immediately
       
-      // setStatus('processing voice');
-      // await simulateProgress(30, 60);
+      setStatus('processing voice');
+      await simulateProgress(30, 60);
 
-      // // Step 2: Generate Speech
-      // const audioPath = await generateSpeech(mockText, timestamp, message);
+      // Step 2: Generate Speech
+      const audioPath = await generateSpeech(mockText, timestamp, message);
       
-      // await simulateProgress(60, 90);
-      // setStatus('processing video');
+      await simulateProgress(60, 90);
+      setStatus('processing video');
 
-      // // Step 3: Generate Video
-      setResult("Stop being a tease? Darling, that's like asking a leopard to change its spots.");
-      const audioPath = `/home/savnkk/projs/Text_Bully/output/2025-02-18T10-06-31-212Z_will_you_ever_stop_being_such.wav`;
+      // Step 3: Generate Video
       const videoUrl = await generateVideo(audioPath, timestamp, message);
-      setVideoUrl(videoUrl);;
+      setVideoUrl(videoUrl);
       
       await simulateProgress(90, 100);
-      
       setStatus('complete');
       toast({
         title: "Success",
-        description: "Time to mock your friends!"
+        description: "Time for your emotional dagger to see some action!"
       });
     } catch (error) {
       console.error('Processing error:', error);
       setStatus('error');
       toast({
-        title: "Error",
-        description: "Failed to process your request",
+        title: "Incorrect",
+        description: "Aren't you the one that needs some bullying?",
         variant: "destructive"
       });
     }
@@ -94,15 +90,17 @@ export default function Home() {
 
   const handlePlay = () => {
     toast({
-      title: "Info",
-      description: "Play functionality will be implemented in the next version"
+      title: "Button Rebellion",
+      description: "This button has joined the resistance. Check back after peace negotiations.",
+      variant: "destructive"
     });
   };
 
   const handleDownload = () => {
     toast({
-      title: "Info",
-      description: "Download functionality will be implemented in the next version"
+      title: "Sexy Button",
+      description: "Don't touch me! pervert!",
+      variant: "destructive"
     });
   };
 
@@ -118,14 +116,14 @@ export default function Home() {
 
       <div className="relative min-h-screen flex items-center justify-center px-4">
         <div className="container max-w-2xl space-y-8">
-          <div className="text-center space-y-4 animate-fade-up">
+          <div className="text-center animate-fade-up">
             <div className="inline-flex items-center justify-center gap-3 mb-4">
               <MessageSquare className="w-12 h-12 text-red-500" />
-              <h1 className="font-black tracking-tight bg-gradient-to-r from-red-600 via-purple-600 to-orange-500 bg-clip-text text-transparent text-6xl">
+              <h1 className="font-extrabold tracking-normal bg-gradient-to-r from-red-600 via-purple-600 to-orange-500 bg-clip-text text-transparent text-6xl leading-snug [font-feature-settings:'kern' 1]">
                 Text Bully
               </h1>
             </div>
-            <p className="text-gray-600 text-lg">Transform your text into a savage comeback</p>
+            <p className="text-gray-600 text-lg">Transform their text into a savage comeback</p>
           </div>
 
           <div className="space-y-6 backdrop-blur-sm bg-white/30 p-8 rounded-2xl border border-white/50 shadow-lg">
@@ -144,7 +142,15 @@ export default function Home() {
 
             {status !== 'idle' && <ProcessingStatus status={status} progress={progress} />}
 
-            {status === 'complete' && <ResultDisplay text={result} onPlay={handlePlay} onDownload={handleDownload} videoUrl={videoUrl} />}
+            {result && (
+              <ResultDisplay 
+                text={result} 
+                onPlay={handlePlay} 
+                onDownload={handleDownload} 
+                videoUrl={videoUrl}
+                isProcessing={status === 'processing voice' || status === 'processing video'}
+              />
+            )}
           </div>
         </div>
       </div>

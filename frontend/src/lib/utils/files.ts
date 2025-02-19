@@ -1,9 +1,9 @@
 import path from 'path';
 import fs from 'fs';
 import fsPromises from 'fs/promises';
-import { Readable } from 'stream';
+import { ReadableStream } from 'stream/web';
 
-export const OUTPUT_DIR = path.resolve(process.cwd(), '../output');
+export const OUTPUT_DIR = path.join(process.cwd(), '../output');
 export const DEFAULT_VIDEO_PATH = path.resolve(process.cwd(), '../final.mp4');
 
 // Ensure output directory exists
@@ -40,7 +40,7 @@ export function writeOutputFile(filepath: string, content: string | Buffer) {
   return filepath;
 }
 
-export async function writeOutputFileAsync(filepath: string, content: Buffer | Readable) {
+export async function writeOutputFileAsync(filepath: string, content: ReadableStream) {
   ensureOutputDir()
   await fsPromises.writeFile(filepath, content);
   return filepath;

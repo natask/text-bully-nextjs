@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import Replicate from 'replicate';
 import { createFileInfo, writeOutputFileAsync } from '@/lib/utils/files';
+import { ReadableStream } from 'stream/web';
 
 const replicate = new Replicate({
   auth: process.env.REPLICATE_API_TOKEN as string,
@@ -25,17 +26,18 @@ export async function POST(req: Request) {
     );
 
     // Download the audio file from the output URL
-    if (typeof output !== 'string') {
-      throw new Error('Invalid output format from Replicate');
+    console.log({ output })
+    let audioBuffer: ReadableStream;
+    if (typeof output === 'string') {
+      const response = await fetch(output);
+      if (!response.ok) {
+        throw new Error(`Failed to download audio: ${response.statusText}`);
+      }
+      audioBuffer = response.body as ReadableStream;
+    } else {
+      audioBuffer = output as ReadableStream;
     }
 
-    const response = await fetch(output);
-    if (!response.ok) {
-      throw new Error(`Failed to download audio: ${response.statusText}`);
-    }
-
-    const audioBuffer = Buffer.from(await response.arrayBuffer());
-    
     // Convert the audio stream to WAV with standardized filename
     const fileInfo = createFileInfo(prompt, timestamp);
     const wavOutputPath = await writeOutputFileAsync(fileInfo.getPath('audio'), audioBuffer);

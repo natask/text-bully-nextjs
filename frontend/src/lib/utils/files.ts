@@ -3,8 +3,8 @@ import fs from 'fs';
 import fsPromises from 'fs/promises';
 import { Readable } from 'stream';
 
-export const OUTPUT_DIR = path.join(process.cwd(), '../output');
-export const DEFAULT_VIDEO_PATH = path.join(process.cwd(), '../final.mp4');
+export const OUTPUT_DIR = path.resolve(process.cwd(), '../output');
+export const DEFAULT_VIDEO_PATH = path.resolve(process.cwd(), '../final.mp4');
 
 // Ensure output directory exists
 export function ensureOutputDir() {
@@ -29,7 +29,7 @@ export function createFileInfo(prompt: string, timestamp?: string): FileInfo {
     cleanPrompt,
     getPath: (type: 'mock' | 'audio' | 'video') => {
       const filename = `${timestamp}_${cleanPrompt}.${type === 'audio' ? 'wav' : type === 'video' ? 'mp4' : 'txt'}`;
-      return path.join(OUTPUT_DIR, filename);
+      return path.resolve(OUTPUT_DIR, filename);
     }
   };
 }

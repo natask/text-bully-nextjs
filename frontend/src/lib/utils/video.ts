@@ -20,13 +20,14 @@ async function getMediaDuration(filePath: string): Promise<number> {
 async function mergeVideoWithAudio(wavPath: string, videoPath: string, outputPath: string): Promise<string> {
     try {
         // Get audio duration
-        const audioDuration = await getMediaDuration(wavPath);
+        const audioPath = path.resolve(process.cwd(), wavPath);
+        const audioDuration = await getMediaDuration(audioPath);
         console.log('Audio duration:', audioDuration);
 
         return new Promise((resolve, reject) => {
             ffmpeg()
                 .input(videoPath)
-                .input(wavPath)
+                .input(audioPath)
                 .outputOptions([
                     '-c:v copy',
                     '-c:a aac',

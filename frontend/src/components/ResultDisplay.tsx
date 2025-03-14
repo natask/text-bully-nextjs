@@ -1,19 +1,21 @@
 import React from 'react';
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Play, Download, MessageSquare, Loader2 } from "lucide-react";
+import { Play, Download, MessageSquare, Loader2, Volume2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ResultDisplayProps {
   text: string;
   videoUrl?: string;
+  audioUrl?: string;
   onPlay: () => void;
   onDownload: () => void;
   className?: string;
   isProcessing?: boolean;
+  status?: 'idle' | 'processing message' | 'processing voice' | 'processing video' | 'complete' | 'error';
 }
 
-const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className, isProcessing }: ResultDisplayProps) => {
+const ResultDisplay = ({ text, videoUrl, audioUrl, onPlay, onDownload, className, isProcessing, status }: ResultDisplayProps) => {
   if (!text) return null;
 
   return (
@@ -25,7 +27,33 @@ const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className, isProces
         </div>
         <p className="text-gray-800 font-medium leading-relaxed break-words whitespace-pre-wrap max-w-full overflow-visible">{text}</p>
       </div>
-      
+      {/* Audio Player Section */}
+      {(audioUrl || isProcessing) && (
+        <div className="mt-4 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg bg-gradient-to-r from-purple-100/80 to-red-100/80 p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <Volume2 className="w-5 h-5 text-purple-600" />
+            <h3 className="text-sm font-medium text-purple-600"></h3>
+          </div>
+          {audioUrl ? (
+            <audio 
+              className="w-full" 
+              controls 
+              src={audioUrl}
+            />
+          ) : isProcessing && status === 'processing voice' ? (
+            <div className="h-12 bg-gray-800/20 rounded-md flex items-center justify-center">
+              <div className="flex items-center gap-3">
+                <Loader2 className="w-5 h-5 text-purple-600 animate-spin" />
+                <p className="text-sm text-purple-600">cooking up the BURN featuring THEEE ONE AND ONLY ANNOYYYING ORANGE</p>
+              </div>
+            </div>
+          ) : isProcessing ? (
+            <div className="h-12 bg-gray-800/20 rounded-md flex items-center justify-center">
+              <p className="text-sm text-purple-600/70">Audio will appear here</p>
+            </div>
+          ) : null}
+        </div>
+      )}
       {videoUrl && (
         <div className="flex gap-3">
           <Button
@@ -49,6 +77,9 @@ const ResultDisplay = ({ text, videoUrl, onPlay, onDownload, className, isProces
         </div>
       )}
       
+
+
+      {/* Video Player Section */}
       <div className="mt-4 rounded-lg overflow-hidden border-2 border-white/50 shadow-lg">
         {videoUrl ? (
           <video

@@ -27,11 +27,12 @@ async function mergeVideoWithAudio(wavPath: string, videoPath: string, outputPat
         return new Promise((resolve, reject) => {
             ffmpeg()
                 .input(videoPath)
+                .inputOptions(['-stream_loop -1'])
                 .input(audioPath)
                 .outputOptions([
                     '-c:v copy',
                     '-c:a aac',
-                    '-strict experimental'
+                    '-shortest'  
                 ])
                 .save(outputPath)
                 .on('end', () => {

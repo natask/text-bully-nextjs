@@ -48,7 +48,7 @@ export async function POST(req: Request) {
     await mergeVideoWithAudio(audioPath, DEFAULT_VIDEO_PATH, videoOutputPath);
     
     // Return the URL to access the video
-    const videoUrl = `/videos/${path.basename(videoOutputPath)}`;
+    const videoUrl = `/api/assets/${path.basename(videoOutputPath)}`;
     return NextResponse.json({ response: videoUrl });
     
   } catch (error) {

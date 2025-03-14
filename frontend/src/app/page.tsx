@@ -16,6 +16,7 @@ export default function Home() {
   const [status, setStatus] = useState<'idle' | 'processing message' | 'processing voice' | 'processing video' | 'complete' | 'error'>('idle');
   const [progress, setProgress] = useState(0);
   const [result, setResult] = useState('');
+  const [audioUrl, setAudioUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
   const { toast } = useToast();
 
@@ -63,6 +64,11 @@ export default function Home() {
 
       // Step 2: Generate Speech
       const audioPath = await generateSpeech(mockText, timestamp, message);
+      
+      // Set the audio URL for playback
+      const audioFileName = audioPath.split('/').pop();
+
+      setAudioUrl(`/api/assets/${audioFileName}`);
       
       await simulateProgress(60, 90);
       setStatus('processing video');
@@ -147,8 +153,10 @@ export default function Home() {
                 text={result} 
                 onPlay={handlePlay} 
                 onDownload={handleDownload} 
+                audioUrl={audioUrl}
                 videoUrl={videoUrl}
                 isProcessing={status === 'processing voice' || status === 'processing video'}
+                status={status}
               />
             )}
           </div>

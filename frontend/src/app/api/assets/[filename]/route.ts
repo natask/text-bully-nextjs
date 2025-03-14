@@ -4,11 +4,11 @@ import fs from 'fs';
 import { OUTPUT_DIR } from '@/lib/utils/files';
 
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { filename: string } }
+  request: Request,
+  { params }: { params: Promise<{ filename: string }> }
 ) {
   // Ensure params is properly awaited
-  const { filename } = params;
+  const { filename } = await params;
   
   // Security check to prevent directory traversal attacks
   if (filename.includes('..') || filename.includes('/')) {

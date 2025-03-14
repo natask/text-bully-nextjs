@@ -8,7 +8,10 @@ export async function generateMockResponse(text: string, timestamp: string): Pro
     }),
   });
   
-  if (!response.ok) throw new Error('Mock generation failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(`Text generation failed: ${response.status} ${response.statusText}${errorData ? ` - ${JSON.stringify(errorData)}` : ''}`);
+  }
   const data = await response.json();
   console.log(data);
   return data.response;
@@ -25,7 +28,10 @@ export async function generateSpeech(text: string, timestamp: string, prompt: st
     }),
   });
   
-  if (!response.ok) throw new Error('Speech generation failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(`Speech generation failed: ${response.status} ${response.statusText}${errorData ? ` - ${JSON.stringify(errorData)}` : ''}`);
+  }
   const data = await response.json();
   console.log(data);
   return data.response;
@@ -42,7 +48,10 @@ export async function generateVideo(audioPath: string, timestamp: string, prompt
     }),
   });
   
-  if (!response.ok) throw new Error('Video generation failed');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(`Video generation failed: ${response.status} ${response.statusText}${errorData ? ` - ${JSON.stringify(errorData)}` : ''}`);
+  }
   const data = await response.json();
   console.log(data);
   return data.response;
